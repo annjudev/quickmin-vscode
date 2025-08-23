@@ -1,36 +1,49 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-const vscode = require('vscode');
+import { minify } from 'terser';
+import { writeFileSync } from 'fs';
+import * as vscode from 'vscode';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+export const activate = (context) => {
+	const editor = vscode.window.activeTextEditor;
+	// Funcion para registrar comandos  y su funcionamiento
+	const registerCommand = (command, callback) => {
+		const disposable = vscode.commands.registerCommand(`quickmin.${command}`, callback);
+		context.subscriptions.push(disposable);
+	}
 
-/**
- * @param {vscode.ExtensionContext} context
- */
-function activate(context) {
+	// REGISTRO DE COMANDOS
+   registerCommand('quickmin', async () => {
+	if (!editor) return vscode.window.showErrorMessage('No hay un archivo abierto');
+	
+	const filePath = editor.document.uri.fsPath;
+	const extensionFile = filePath.split('.').pop();
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "quickmin" is now active!');
+	if(!extensionFile.includes('js')) return vscode.window.showErrorMessage('El archivo debe tener la extensión .js');
+	
+	const documentCode = editor.document.getText();
+	const configMinify = {
+		compress: {
+			passes: 3,           // Varios pases de optimización
+			drop_console: true,  // Elimina console.log, console.error, etc.
+			drop_debugger: true, // Elimina "debugger"
+			dead_code: true,     // Borra código inalcanzable
+		},
+		mangle: {
+			toplevel: true,      // Renombra variables y funciones de nivel superior
+		},
+		toplevel: true,        // Permite optimizar variables globales
+		format: {
+			comments: false,     // Quita comentarios
+		}
+	};
+	const result = await minify(documentCode, configMinify);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('quickmin.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
+	const originalPath = editor.document.uri.fsPath;
+	const newPath = originalPath.replace(/\.js$/, ".min.js");
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from quickmin!');
-	});
+	writeFileSync(newPath, result.code, "utf8");
+	 vscode.window.showInformationMessage(`Archivo minificado correctamente.`);
 
-	context.subscriptions.push(disposable);
+});
 }
 
-// This method is called when your extension is deactivated
-function deactivate() {}
-
-module.exports = {
-	activate,
-	deactivate
-}
+export const deactivate = () => {}
