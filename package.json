@@ -4,6 +4,8 @@
   "type": "module",
   "description": "Minify JS",
   "version": "0.0.1",
+  "publisher": "JuanRamirez",
+  "icon": "images/icon.png",
   "engines": {
     "vscode": "^1.103.0"
   },
