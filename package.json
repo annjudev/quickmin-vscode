@@ -3,7 +3,7 @@
   "displayName": "quickmin",
   "type": "module",
   "description": "Minify JS",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "JuanRamirez",
   "icon": "images/icon.png",
   "engines": {
