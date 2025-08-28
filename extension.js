@@ -1,22 +1,26 @@
-import { minify } from 'terser';
 import { writeFileSync, existsSync } from 'fs';
 import * as vscode from 'vscode';
-// -----------------------------
-import { minifyJavascript } from './src/functions/minify-javascript.js';
-
-
+import { availableLanguages } from './available-languages.js';
 
 export const activate = (context) => {
     vscode.workspace.onDidSaveTextDocument((document) => {
-  		const filePath = document.uri.fsPath.replace(/\.js$/, '.min.js');
-			if (!existsSync(filePath)) return;
-			
-			// Esto funciona unicamente para js. (Actualmente jeje)
-			vscode.commands.executeCommand('quickmin.quickmin');
+			availableLanguages.forEach(({ name, ext }) => {
+				const filePath = document.uri.fsPath.replace(new RegExp(`\\.${ext}$`), `.min.${ext}`);
+				if (!existsSync(filePath)) return;
+
+				document.languageId === name && vscode.commands.executeCommand('quickmin.quickmin');
+			})
     });
 
     // REGISTRO DE COMANDOS
-    registerCommand(context, 'quickmin', () => minifyJavascript({ vscode, minify, writeFileSync }));
+    registerCommand(context, 'quickmin', () => {
+			availableLanguages.forEach(async ({ name, method, path }) => {
+				if (vscode.window.activeTextEditor?.document.languageId === name) {
+					const Minify = await import(`./src/functions/${path}.js`);
+					Minify[method]({ vscode, writeFileSync });
+				}
+			});
+		});
 };
 
 export const deactivate = () => {}

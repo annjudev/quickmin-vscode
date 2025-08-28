@@ -1,4 +1,6 @@
-export const minifyJavascript = async ({ vscode, minify, writeFileSync }) => {
+import { minify } from 'terser';
+
+export const minifyJavascript = async ({ vscode, writeFileSync }) => {
   const editor = vscode.window.activeTextEditor;
   if (!editor) return vscode.window.showErrorMessage('No hay un archivo abierto');
 

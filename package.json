@@ -12,13 +12,15 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": ["onLanguage:javascript"],
+  "activationEvents": [
+    "onLanguage:javascript"
+  ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
       {
         "command": "quickmin.quickmin",
-        "title": "Minify JS"
+        "title": "Minify (Quickmin)"
       }
     ]
   },
@@ -36,6 +38,7 @@
     "eslint": "9.32.0"
   },
   "dependencies": {
+    "html-minifier-terser": "^7.2.0",
     "terser": "5.43.1"
   }
 }
